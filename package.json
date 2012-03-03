@@ -1,0 +1,19 @@
+{
+	"name"           :"photo-recovery",
+	"description"    :"",
+	"version"        :"0.0.0",
+	"author"         :"Brian Demant <brian.demant@gmail.com>",
+	"main"           :"./src/photo_recovery.js",
+	"homepage"       :"http://github.com/",
+	"repository"     :{
+		"type":"git",
+		"url" :"http://github.com/"
+	},
+	"dependencies"   :{
+		"image-ident":"git://github.com/briandemant/image-ident-node.git"
+	},
+	"devDependencies":{
+		"expect.js":">= 0.1.2",
+		"mocha"    :">= 0.12.1"
+	}
+}
