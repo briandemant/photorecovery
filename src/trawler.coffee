@@ -9,19 +9,21 @@ class Trawler extends EventEmitter2
 		@glob = new Globber @roots...
 		@glob.lookfor(/\.jpg$/i)
 		@glob.on "match", (filepath, stat, root) =>
-			@get_image_info(filepath, stat, root)
+			@get_basic_info(filepath, stat, root)
 
 
-	get_image_info: (filepath, stat, root) ->
-		image_ident.info path.join(root, filepath), (err, data) =>
+	get_basic_info: (filepath, stat, root) ->
+		image_ident.basic path.join(root, filepath), (err, data) =>
 			console.log(err) if err
 			@emit("error.import_image", err) if err
-				#console.log ""
-			console.log sprintf("%s %4d x %4d %s", data["md5"],data["info"]['height'],data["info"]['width'],filepath)
+			#console.log ""
+			console.log sprintf("%s %s %s", data["md5"], root, filepath)
 
 	#console.log data
 
 	run: ->
 		@glob.execute()
 
-module.exports = Trawler
+[x,x,dirs...] = process.argv 
+trawler = new Trawler dirs...
+trawler.run()

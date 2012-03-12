@@ -1,0 +1,1 @@
+mocha -R list -G spec/$1*spec.coffee 
