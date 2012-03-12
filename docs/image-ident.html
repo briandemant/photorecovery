@@ -1,0 +1,42 @@
+<!DOCTYPE html>  <html> <head>   <title>image-ident.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="app.html">                 app.coffee               </a>                                           <a class="source" href="env.html">                 env.coffee               </a>                                           <a class="source" href="exiftags.html">                 exiftags.coffee               </a>                                           <a class="source" href="globber.html">                 globber.coffee               </a>                                           <a class="source" href="image-ident.html">                 image-ident.coffee               </a>                                           <a class="source" href="trawler.html">                 trawler.coffee               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               image-ident.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>                            </td>             <td class="code">               <div class="highlight"><pre><span class="nv">exiftags = </span><span class="nx">require</span> <span class="s1">&#39;./exiftags&#39;</span>
+<span class="nv">fs = </span><span class="nx">require</span> <span class="s1">&#39;fs&#39;</span>
+<span class="nv">exec = </span><span class="nx">require</span><span class="p">(</span><span class="s1">&#39;child_process&#39;</span><span class="p">).</span><span class="nx">exec</span>
+
+<span class="nv">exports.info = </span><span class="nf">(path, callback) -&gt;</span>
+	<span class="nx">fs</span><span class="p">.</span><span class="nx">stat</span> <span class="nx">path</span><span class="p">,</span> <span class="nf">(err, stats) -&gt;</span>
+		<span class="k">if</span> <span class="nx">err</span>
+			<span class="nx">callback</span> <span class="nx">err</span>
+		<span class="k">else</span>
+			<span class="nx">exec</span> <span class="s2">&quot;md5sum &#39;&quot;</span> <span class="o">+</span> <span class="nx">path</span> <span class="o">+</span> <span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="nf">(error, md5) -&gt;</span>
+				<span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="nx">error</span> <span class="k">if</span> <span class="nx">error</span>
+				<span class="nx">exec</span> <span class="s2">&quot;identify -format &#39;%w %h %q %Q &#39; &#39;&quot;</span> <span class="o">+</span> <span class="nx">path</span> <span class="o">+</span> <span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="nf">(error, info) -&gt;</span>
+					<span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="nx">error</span> <span class="k">if</span> <span class="nx">error</span>
+					<span class="p">[</span><span class="nx">width</span><span class="p">,</span> <span class="nx">height</span><span class="p">,</span> <span class="nx">color</span><span class="p">,</span> <span class="nx">quality</span><span class="p">]</span> <span class="o">=</span> <span class="nx">info</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+					<span class="nx">exiftags</span><span class="p">.</span><span class="nx">read</span> <span class="nx">path</span><span class="p">,</span> <span class="nf">(err, result) -&gt;</span>
+						<span class="nx">callback</span> <span class="kc">null</span><span class="p">,</span>
+								<span class="s1">&#39;stats&#39;</span>    <span class="o">:</span>
+									<span class="s1">&#39;size&#39;</span> <span class="o">:</span> <span class="nx">stats</span><span class="p">[</span><span class="s1">&#39;size&#39;</span><span class="p">]</span>
+									<span class="s1">&#39;mtime&#39;</span><span class="o">:</span> <span class="nx">stats</span><span class="p">[</span><span class="s1">&#39;mtime&#39;</span><span class="p">]</span>
+									<span class="s1">&#39;ctime&#39;</span><span class="o">:</span> <span class="nx">stats</span><span class="p">[</span><span class="s1">&#39;ctime&#39;</span><span class="p">]</span>
+								<span class="s1">&#39;md5&#39;</span>      <span class="o">:</span> <span class="nx">md5</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+								<span class="s1">&#39;info&#39;</span>     <span class="o">:</span>
+									<span class="s1">&#39;width&#39;</span>     <span class="o">:</span> <span class="nx">width</span><span class="o">|</span><span class="mi">0</span>
+									<span class="s1">&#39;height&#39;</span>    <span class="o">:</span> <span class="nx">height</span><span class="o">|</span><span class="mi">0</span>
+									<span class="s1">&#39;colorspace&#39;</span><span class="o">:</span> <span class="nx">color</span><span class="o">|</span><span class="mi">0</span>
+									<span class="s1">&#39;quality&#39;</span>   <span class="o">:</span> <span class="nx">quality</span><span class="o">|</span><span class="mi">0</span>
+								<span class="s1">&#39;exif-data&#39;</span><span class="o">:</span> <span class="p">(</span><span class="nx">result</span> <span class="o">||</span> <span class="kc">false</span><span class="p">)</span>
+<span class="nv">exports.basic = </span><span class="nf">(path, callback) -&gt;</span>
+	<span class="nx">fs</span><span class="p">.</span><span class="nx">stat</span> <span class="nx">path</span><span class="p">,</span> <span class="nf">(err, stats) -&gt;</span>
+		<span class="k">if</span> <span class="nx">err</span>
+			<span class="nx">callback</span> <span class="nx">err</span>
+		<span class="k">else</span>
+			<span class="nx">exec</span> <span class="s2">&quot;md5sum &#39;&quot;</span> <span class="o">+</span> <span class="nx">path</span> <span class="o">+</span> <span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="nf">(error, md5) -&gt;</span>
+				<span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="nx">error</span> <span class="k">if</span> <span class="nx">error</span>
+				<span class="nx">callback</span> <span class="kc">null</span><span class="p">,</span>
+						<span class="s1">&#39;stats&#39;</span>    <span class="o">:</span>
+							<span class="s1">&#39;size&#39;</span> <span class="o">:</span> <span class="nx">stats</span><span class="p">[</span><span class="s1">&#39;size&#39;</span><span class="p">]</span>
+							<span class="s1">&#39;mtime&#39;</span><span class="o">:</span> <span class="nx">stats</span><span class="p">[</span><span class="s1">&#39;mtime&#39;</span><span class="p">]</span>
+							<span class="s1">&#39;ctime&#39;</span><span class="o">:</span> <span class="nx">stats</span><span class="p">[</span><span class="s1">&#39;ctime&#39;</span><span class="p">]</span>
+						<span class="s1">&#39;md5&#39;</span>      <span class="o">:</span> <span class="nx">md5</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+</pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 

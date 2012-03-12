@@ -1,0 +1,7 @@
+{
+  "destination": "destination",
+  "sources": [
+    "examples",
+    "spec/fixtures"
+  ]
+}

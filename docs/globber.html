@@ -1,0 +1,101 @@
+<!DOCTYPE html>  <html> <head>   <title>globber.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="app.html">                 app.coffee               </a>                                           <a class="source" href="env.html">                 env.coffee               </a>                                           <a class="source" href="exiftags.html">                 exiftags.coffee               </a>                                           <a class="source" href="globber.html">                 globber.coffee               </a>                                           <a class="source" href="image-ident.html">                 image-ident.coffee               </a>                                           <a class="source" href="trawler.html">                 trawler.coffee               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               globber.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>               <p>Search through dirs and subdirs for files matching one or more regexes</p>
+
+<p>Globber is a EventEmitter2 object and fires events when files og dirs are found</p>
+
+<h2>Usage:</h2>
+
+<pre><code>  glob = new Globber "./spec/fixtures", "src", "src/app.coffee"
+  glob.lookfor(/jpg$/i)
+
+  glob.on "dir", (dir, stat, root) -&gt;
+      console.log "dir  : #{root}/#{dir}"
+
+  glob.on "file", (file, stat, root) -&gt;
+      console.log "file : #{root}/#{file}")
+
+  glob.on "match", (file, stat, root, regex) -&gt;
+      console.log "FOUND : #{file} via #{regex}")
+
+  glob.execute(-&gt; console.log "done!")
+
+  console.log "Yes!!!"
+</code></pre>
+
+<h2>Events</h2>
+
+<ul>
+<li><strong>file</strong>   when a file has been found</li>
+<li><strong>dir</strong>   when a directory has been found</li>
+<li><strong>match</strong>   when a file matches the regex has been found</li>
+</ul>
+
+<p>If 2 regexes match the same file the match event will be fired twice!</p>
+
+<p>If no regexes are added then all files fires the match event</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="p">{</span><span class="nx">EventEmitter2</span><span class="p">}</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;eventemitter2&#39;</span><span class="p">)</span>
+<span class="nv">fs = </span><span class="nx">require</span><span class="p">(</span><span class="s2">&quot;fs&quot;</span><span class="p">)</span>
+<span class="nv">path = </span><span class="nx">require</span><span class="p">(</span><span class="s2">&quot;path&quot;</span><span class="p">)</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <h3>Constructor</h3>
+
+<p>params [roots] one or more paths to dirs or files</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="k">class</span> <span class="nx">Globber</span> <span class="k">extends</span> <span class="nx">EventEmitter2</span>
+	<span class="nv">constructor: </span><span class="nf">(@roots...)-&gt;</span>
+		<span class="vi">@debug = </span><span class="kc">false</span>
+		<span class="vi">@used = </span><span class="kc">false</span>
+		<span class="vi">@matchers = </span><span class="p">[]</span>
+
+		<span class="k">this</span><span class="p">.</span><span class="kc">on</span> <span class="s2">&quot;file&quot;</span><span class="p">,</span> <span class="nf">(file, stat, root)-&gt;</span>
+			<span class="k">if</span> <span class="nx">@matchers</span><span class="p">.</span><span class="nx">length</span> <span class="o">==</span> <span class="mi">0</span>
+				<span class="nx">@emit</span><span class="p">(</span><span class="s2">&quot;match&quot;</span><span class="p">,</span> <span class="nx">file</span><span class="p">,</span> <span class="nx">stat</span><span class="p">,</span> <span class="nx">root</span><span class="p">)</span>
+			<span class="k">else</span>
+				<span class="nx">@matchers</span><span class="p">.</span><span class="nx">forEach</span> <span class="p">(</span><span class="nx">regex</span><span class="p">)</span> <span class="o">=&gt;</span>
+					<span class="k">if</span> <span class="nx">file</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="nx">regex</span><span class="p">)</span>
+						<span class="nx">@emit</span><span class="p">(</span><span class="s2">&quot;match&quot;</span><span class="p">,</span> <span class="nx">file</span><span class="p">,</span> <span class="nx">stat</span><span class="p">,</span> <span class="nx">root</span><span class="p">,</span> <span class="nx">regex</span><span class="p">)</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <h4>lookfor</h4>
+
+<p>@params [regex] regex to look for</p>             </td>             <td class="code">               <div class="highlight"><pre>	<span class="nv">lookfor    : </span><span class="nf">(regex)-&gt;</span>
+		<span class="nx">@matchers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">regex</span><span class="p">)</span></pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <h4>taverse_dir</h4>
+
+<p><strong>private</strong> .. please don't call directly</p>             </td>             <td class="code">               <div class="highlight"><pre>	<span class="nv">taverse_dir: </span><span class="p">(</span><span class="nx">root</span><span class="p">,</span> <span class="nx">dir</span><span class="p">,</span> <span class="nx">done</span><span class="p">)</span> <span class="o">=&gt;</span>
+		<span class="nx">@left</span><span class="o">++</span>
+		<span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="s2">&quot;dir &gt;&gt; #{dir}&quot;</span> <span class="k">if</span> <span class="nx">@debug</span>
+		<span class="nx">fs</span><span class="p">.</span><span class="nx">readdir</span> <span class="nx">dir</span><span class="p">,</span> <span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">files</span><span class="p">)</span> <span class="o">=&gt;</span>
+			<span class="nx">@emit</span><span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="p">{</span><span class="nv">path: </span><span class="nx">dir</span><span class="p">,</span> <span class="nv">error: </span><span class="nx">err</span><span class="p">})</span> <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+			<span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="s2">&quot; len #{files.length}&quot;</span> <span class="k">if</span> <span class="nx">@debug</span>
+
+			<span class="nx">@left</span> <span class="o">+=</span> <span class="nx">files</span><span class="p">.</span><span class="nx">length</span>
+
+			<span class="nx">files</span><span class="p">.</span><span class="nx">forEach</span> <span class="p">(</span><span class="nx">file</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span> <span class="o">=&gt;</span>
+				<span class="nv">fullpath = </span><span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">dir</span><span class="p">,</span> <span class="nx">file</span><span class="p">)</span>
+				<span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="s2">&quot; - #{fullpath}&quot;</span> <span class="k">if</span> <span class="nx">@debug</span>
+				<span class="nx">fs</span><span class="p">.</span><span class="nx">stat</span> <span class="nx">fullpath</span><span class="p">,</span> <span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">stat</span><span class="p">)</span> <span class="o">=&gt;</span>
+					<span class="k">if</span> <span class="nx">stat</span><span class="p">.</span><span class="nx">isDirectory</span><span class="p">()</span>
+						<span class="nx">@taverse_dir</span><span class="p">(</span><span class="nx">root</span><span class="p">,</span> <span class="nx">fullpath</span><span class="p">,</span> <span class="nx">done</span><span class="p">)</span>
+						<span class="nx">@emit</span><span class="p">(</span><span class="s2">&quot;dir&quot;</span><span class="p">,</span> <span class="nx">path</span><span class="p">.</span><span class="nx">relative</span><span class="p">(</span><span class="nx">root</span><span class="p">,</span> <span class="nx">fullpath</span><span class="p">),</span> <span class="nx">stat</span><span class="p">,</span> <span class="nx">root</span><span class="p">)</span>
+					<span class="k">else</span>
+						<span class="nx">@emit</span><span class="p">(</span><span class="s2">&quot;file&quot;</span><span class="p">,</span> <span class="nx">path</span><span class="p">.</span><span class="nx">relative</span><span class="p">(</span><span class="nx">root</span><span class="p">,</span> <span class="nx">fullpath</span><span class="p">),</span> <span class="nx">stat</span><span class="p">,</span> <span class="nx">root</span><span class="p">)</span>
+					<span class="nx">done</span><span class="p">()</span>
+
+			<span class="nx">done</span><span class="p">()</span></pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <h4>execute</h4>
+
+<p>The callback is called when the last event has been emitted.</p>
+
+<p>This means that the callback is called <em>long</em> before the callbacks for the events are finished</p>             </td>             <td class="code">               <div class="highlight"><pre>	<span class="nv">execute    : </span><span class="nf">(done = -&gt;)-&gt;</span>
+		<span class="k">throw</span> <span class="s2">&quot;Cannot reuse a Globber please make a new&quot;</span>		  <span class="k">if</span> <span class="nx">@used</span>
+
+		<span class="vi">@used = </span><span class="kc">true</span>
+		<span class="vi">@left = </span><span class="mi">0</span>
+
+		<span class="k">for</span> <span class="nx">root</span> <span class="k">in</span> <span class="nx">@roots</span>
+			<span class="nx">do</span> <span class="p">(</span><span class="nx">root</span><span class="p">)</span> <span class="o">=&gt;</span>
+				<span class="nv">root = </span><span class="nx">path</span><span class="p">.</span><span class="nx">normalize</span><span class="p">(</span><span class="nx">root</span><span class="p">)</span>
+				<span class="nx">fs</span><span class="p">.</span><span class="nx">stat</span> <span class="nx">root</span><span class="p">,</span> <span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">stat</span><span class="p">)</span> <span class="o">=&gt;</span>
+					<span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="s2">&quot;root &gt;&gt; #{root}&quot;</span> <span class="k">if</span> <span class="nx">@debug</span>
+					<span class="k">if</span> <span class="nx">stat</span><span class="p">.</span><span class="nx">isDirectory</span><span class="p">()</span>
+						<span class="nx">@taverse_dir</span> <span class="nx">root</span><span class="p">,</span> <span class="nx">root</span><span class="p">,</span> <span class="o">=&gt;</span>
+							<span class="k">if</span>  <span class="o">--</span><span class="nx">@left</span> <span class="o">==</span> <span class="mi">0</span>
+								<span class="nx">@emit</span><span class="p">(</span><span class="s2">&quot;done&quot;</span><span class="p">)</span>
+								<span class="nx">done</span><span class="p">()</span>
+						<span class="nx">@emit</span><span class="p">(</span><span class="s2">&quot;dir&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="nx">stat</span><span class="p">,</span> <span class="nx">root</span><span class="p">)</span>
+					<span class="k">else</span>
+						<span class="nx">@emit</span><span class="p">(</span><span class="s2">&quot;file&quot;</span><span class="p">,</span> <span class="nx">path</span><span class="p">.</span><span class="nx">basename</span><span class="p">(</span><span class="nx">root</span><span class="p">),</span> <span class="nx">stat</span><span class="p">,</span> <span class="nx">path</span><span class="p">.</span><span class="nx">dirname</span><span class="p">(</span><span class="nx">root</span><span class="p">))</span>
+
+<span class="nv">module.exports = </span><span class="nx">Globber</span>
+
+</pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 
