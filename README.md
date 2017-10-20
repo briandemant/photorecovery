@@ -1,6 +1,6 @@
 https://github.com/LearnBoost/expect.js
 http://nodejs.org/docs/v0.6.10/api/
-http://visionmedia.github.com/mocha/
+http://mochajs.org/
 https://github.com/caolan/async
 
 https://github.com/isaacs/node-glob
